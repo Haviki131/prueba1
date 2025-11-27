@@ -15,7 +15,7 @@ const Layout = () => {
     ];
 
     return (
-        <div style={{ paddingBottom: '80px', minHeight: '100vh', maxWidth: '600px', margin: '0 auto', padding: '20px', paddingBottom: '100px' }}>
+        <div style={{ minHeight: '100vh', maxWidth: '600px', margin: '0 auto', padding: '20px', paddingBottom: '100px' }}>
             <Outlet />
 
             <MusicPlayer />
