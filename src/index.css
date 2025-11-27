@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap');
+
+:root {
+  --hk-pink-light: #FFEFF3;
+  --hk-pink-medium: #FFB7C5;
+  --hk-pink-hot: #FF69B4;
+  --hk-red: #FF0000;
+  --hk-white: #FFFFFF;
+  --hk-text: #4A4A4A;
+  --hk-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+  --hk-font: 'Quicksand', sans-serif;
+  --hk-title-font: 'Fredoka One', cursive;
+  --hk-radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--hk-font);
+  background-color: var(--hk-pink-light);
+  color: var(--hk-text);
+  min-height: 100vh;
+  background-image: radial-gradient(var(--hk-pink-medium) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+h1 {
+  font-family: var(--hk-title-font);
+  text-shadow: 2px 2px 0px var(--hk-pink-light), 4px 4px 0px rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Scrollbar cute styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--hk-pink-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hk-pink-medium);
+  border-radius: 10px;
+  border: 2px solid var(--hk-pink-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hk-pink-hot);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Apply fade in to main content */
+main {
+  animation: fadeIn 0.5s ease-out;
+}

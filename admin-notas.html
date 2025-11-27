@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Notas</title>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #FFB7C5 0%, #FF69B4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #FF69B4;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #FFB7C5;
+            border-radius: 10px;
+            min-height: 150px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #FF69B4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #FF1493;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .notes-list {
+            margin-top: 30px;
+            border-top: 2px solid #FFB7C5;
+            padding-top: 20px;
+        }
+
+        .note-item {
+            background: #FFF3E0;
+            padding: 15px;
+            padding-right: 50px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>💌 Panel de Notas para Ella</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+            Escribe una nota y aparecerá en su app automáticamente
+        </p>
+
+        <textarea id="noteText" placeholder="Escribe algo bonito..."></textarea>
+        <button onclick="addNote()">Enviar Nota 💖</button>
+
+        <div id="status"></div>
+
+        <div class="notes-list">
+            <h3 style="color: #FF69B4;">Notas Enviadas:</h3>
+            <div id="notesList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAJ9GuiAvsPGrr3toLSLv0cQvKn5M3snI",
+            authDomain: "regalo-3-meses.firebaseapp.com",
+            projectId: "regalo-3-meses",
+            storageBucket: "regalo-3-meses.firebasestorage.app",
+            messagingSenderId: "585525460622",
+            appId: "1:585525460622:web:550cc2479930b9b93a53df"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.addNote = async function () {
+            const text = document.getElementById('noteText').value;
+            if (!text.trim()) {
+                showStatus('Por favor escribe algo', 'error');
+                return;
+            }
+
+            try {
+                const colors = ["#FFEFF3", "#FFFDE7", "#E0F7FA", "#F3E5F5"];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                await addDoc(collection(db, "notes"), {
+                    text: text,
+                    color: randomColor,
+                    createdAt: new Date().toISOString()
+                });
+
+                showStatus('¡Nota enviada! 💖', 'success');
+                document.getElementById('noteText').value = '';
+                loadNotes();
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        };
+
+        async function deleteNoteFunc(id) {
+            if (!confirm('¿Borrar esta nota?')) return;
+            try {
+                await deleteDoc(doc(db, "notes", id));
+                showStatus('Nota borrada', 'success');
+                loadNotes();
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            setTimeout(() => {
+                status.textContent = '';
+                status.className = 'status';
+            }, 3000);
+        }
+
+        async function loadNotes() {
+            try {
+                const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                const notesList = document.getElementById('notesList');
+
+                if (querySnapshot.empty) {
+                    notesList.innerHTML = '<p style="color: #999;">No hay notas todavía</p>';
+                    return;
+                }
+
+                notesList.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    const note = docSnap.data();
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'note-item';
+                    noteDiv.style.backgroundColor = note.color || '#FFF3E0';
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = () => deleteNoteFunc(docSnap.id);
+
+                    const textP = document.createElement('p');
+                    textP.style.margin = '0 0 5px 0';
+                    textP.textContent = note.text;
+
+                    const timeSmall = document.createElement('small');
+                    timeSmall.style.color = '#999';
+                    timeSmall.textContent = new Date(note.createdAt).toLocaleString();
+
+                    noteDiv.appendChild(deleteBtn);
+                    noteDiv.appendChild(textP);
+                    noteDiv.appendChild(timeSmall);
+                    notesList.appendChild(noteDiv);
+                });
+            } catch (error) {
+                document.getElementById('notesList').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+            }
+        }
+
+        loadNotes();
+    </script>
+</body>
+
+</html>
